@@ -265,13 +265,14 @@ sub ser_eval {
     $value
 }
 
+my $disableLocalFile = $ENV{RSERVE_DISABLE_LOCAL_FILE};
 
 sub get_file {
     my ($self, $remote, $local) = (shift, shift, shift);
 
     my $data = pack 'C*', @{$self->eval("readBin('$remote', what='raw', n=file.info('$remote')[['size']])")->to_pl};
 
-    if ($local) {
+    if (!$disableLocalFile && $local) {
         open my $local_file, '>:raw', $local or
             croak "Cannot open $!";
         
@@ -484,6 +485,9 @@ Transfers a file named REMOTE_NAME from the Rserve server to the local
 machine, copying it to LOCAL_NAME if it is specified. The file is
 transferred in binary mode. Returns the contents of the file as a
 scalar.
+
+Note that if the environment variable RSERVE_DISABLE_LOCAL_FILE is set,
+then no local file will be saved even if the LOCAL_NAME is specified.
 
 =item close
 
